@@ -35,17 +35,9 @@ os.environ['TZ'] = 'US/Eastern'
 #chans=['1','3','6','9','11','12','14']
 chans=['1','6','9','11',]
 devices=[]
-#chans=['1']
-#a_list = ['5c:aa:fd:f8:5a:23']
-a_list = []
-w_ssid_list = ['AAOOJVWKS_5GHz',
-        'AAOOJVWEW_2Gz',
-        'not-free',
-        'CSN',
-        'hospinet'
-        ]
-b_ssid_list = ['Paracelsus']
-w_macf_list = ['AzureWave Technology Inc.']
+w_ssid_list = ['']
+b_ssid_list = ['']
+w_macf_list = ['']
 
 ## Traffic Light Vars
 red = 26
