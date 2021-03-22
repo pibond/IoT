@@ -1,8 +1,20 @@
 #!/usr/bin/python3
-##
-## Authors: Philip Bertuglia 
-## Last Update:    March 14, 2021
-##
+##################################
+##                               #
+## Author: Philip Bertugia       #
+## Date: 03/14/2021              #
+##   First rev closer to 2017.   #
+##                               #
+## Desc:                         # 
+## I have a traffic light.       #
+## What would you do?            #
+## Listens for wifi probes and   #
+## alerts for unknowns via GPIO  #
+## and relay board on a RPi.     #
+##                               #
+## WiFi attacks detected:        #
+##    Karma and Deauth Floods    #
+##################################
 
 import sys, re, time
 import netifaces
