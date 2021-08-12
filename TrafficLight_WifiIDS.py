@@ -37,6 +37,7 @@ seq_lock = False
 #chans=['1','6','11','14']
 #chans=['36','38','40','42','44','46','48','149','151','153','155','157','159','161','165']
 chans=['1','6','11','14','36','38','40','42','44','46','48','149','151','153','155','157','159','161','165']
+#chans=['1','6','11','14']
 #chans=['1','11','38']
 
 ## TrafficLight Pins, BCM
@@ -55,13 +56,15 @@ karma_ssid_list = []
 
 ## Static allow and block lists.
 a_ssid_list = [
-        'Sonos_YMKD5ESmQ9GLsXch3MeYDv5bj7'
         ]
 
 b_ssid_list = [
         ]
 
 wtf_ssid_list = [
+        ]
+
+wtf_bssid_list = [
         ]
 
 a_macf_list = [
@@ -110,6 +113,7 @@ def phandle(p):
     ptime=time.strftime("%Y-%m-%d %H:%M:%S %Z")
     alert = ""
     ssid = ""
+    rssi = ""
     macf = ""
     has_apple = False
     has_broadcom = False
@@ -121,6 +125,8 @@ def phandle(p):
 #        print(channel)
     if p.haslayer(Dot11ProbeReq) and p.haslayer(Dot11Elt):
             bssid = str(p.addr2)
+            rssi = str(-(256-ord(p.notdecoded[-4:-3])))
+#            print(str(ord(p.notdecoded[-4:-3])))
             try:
                 ssid = p[Dot11Elt].info.decode('utf-8')
             except:
@@ -137,9 +143,9 @@ def phandle(p):
                 alert = "Sniffed our own Karma test probe. Not evil."
                 q.put_nowait("Self-sniffed Karma Probe: " + ssid + "\n")
             elif ssid != "":
-                if ssid in wtf_ssid_list:
-                    seq = [2,4]
-                    t = 0.25
+                if (ssid in wtf_ssid_list) or (bssid in wtf_bssid_list):
+                    seq = [2,0]
+                    t = 0.2
                     count = 10
                     alert = "Untrusted_SSID_Probe"
                 elif ssid in b_ssid_list:
@@ -174,22 +180,23 @@ def phandle(p):
 #                    alert = "Unknow_HW_Probe"
     elif (p.haslayer(Dot11Beacon) or p.haslayer(Dot11ProbeResp)) and p.haslayer(Dot11Elt):
             bssid = str(p.addr2)
+            rssi = str(-(256-ord(p.notdecoded[-4:-3])))
             try:
                 ssid = p[Dot11Elt].info.decode('utf-8')
             except:
                 ssid = p[Dot11Elt].info.decode('utf-16')
             if ssid in karma_ssid_list:
-                seq = [1,2,4,2,1,2]
-                t = 0.25
+                seq = [1,2,4,2]
+                t = 0.20
                 count = 30
                 alert = "Karma_Attack_Detected!"
                 q.put_nowait("Karma: " + ssid + "\n")
 #            else:
-#                q.put_nowait("Beacon Received:" + ssid + " \n")
+#               q.put_nowait("Beacon Received:" + ssid + " \n")
     if count != 0:
         args = [seq,t,count]
         blink_thread(args)
-        log_string = alert + ";" + str(ptime) + ";" + bssid + ";" + str(macf) + ";" + ssid + "\n"
+        log_string = alert + ";" + str(ptime) + ";" + bssid + ";" + str(macf) + ";" + ssid + ";" + rssi + "\n"
         q.put_nowait(log_string)
         lf.write(log_string)
         lf.flush()
@@ -222,7 +229,7 @@ def rotate_chans(args):
 
 def header():
     start_time=time.strftime("%Y-%m-%d %H:%M:%S %Z")
-    header_line = "Type;Date(" + start_time + ");BSSID;Manufacturer;SSID" + "\n"
+    header_line = "Type;Date(" + start_time + ");BSSID;Manufacturer;SSID;RSSI" + "\n"
     lf.write(header_line)
     q.put_nowait(header_line)
     lf.flush()
